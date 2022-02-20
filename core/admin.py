@@ -1,6 +1,6 @@
 from django.template.defaultfilters import truncatechars
 from django.contrib import admin
-from .models import Book, Author, Genre
+from .models import Book, Author, Genre,Review
 # Register your models here.
 
 class BookAdmin(admin.ModelAdmin):
@@ -16,7 +16,10 @@ class AuthorAdmin(admin.ModelAdmin):
     
     list_display = ('id','slug','name','about_author')
     
-
+class ReviewAdmin(admin.ModelAdmin):
+    list_display = ('id','book','rating','updated')
+    
 admin.site.register(Book,BookAdmin)
 admin.site.register(Author,AuthorAdmin)
 admin.site.register(Genre,GenreAdmin)
+admin.site.register(Review,ReviewAdmin)
