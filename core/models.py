@@ -1,8 +1,18 @@
 from django.db.models.signals import post_save,post_delete
 from django.db import models
+from django.conf import settings
+from rest_framework.authtoken.models import Token
+from django.dispatch import receiver
 from django.utils.text import slugify 
 from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator,MaxValueValidator
+
+# Signals
+
+@receiver(post_save, sender=settings.AUTH_USER_MODEL)
+def create_auth_token(sender, instance=None, created=False, **kwargs):
+    if created:
+        Token.objects.create(user=instance)
 
 # Create your models here.
 class Author(models.Model):
@@ -62,3 +72,5 @@ def genre_book_decrement(sender,instance,*args,**kwargs):
     
     
 post_delete.connect(genre_book_decrement,sender=Book)
+
+
