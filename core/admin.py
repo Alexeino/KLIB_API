@@ -17,7 +17,7 @@ class AuthorAdmin(admin.ModelAdmin):
     list_display = ('id','slug','name','about_author')
     
 class ReviewAdmin(admin.ModelAdmin):
-    list_display = ('id','book','rating','updated')
+    list_display = ('id','book','rating','updated','review_user')
     
 admin.site.register(Book,BookAdmin)
 admin.site.register(Author,AuthorAdmin)

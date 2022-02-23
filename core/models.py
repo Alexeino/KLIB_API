@@ -1,4 +1,4 @@
-from statistics import mode
+from django.db.models.signals import post_save,post_delete
 from django.db import models
 from django.utils.text import slugify 
 from django.contrib.auth.models import User
@@ -21,8 +21,8 @@ class Author(models.Model):
 class Genre(models.Model):
     title = models.CharField(max_length=20)
     description = models.TextField()
-    books_count = models.PositiveIntegerField(null=True,blank=True)
-    slug = models.SlugField(unique=True,null=True,blank=True)
+    books_count = models.PositiveIntegerField(default=0)
+    slug = models.SlugField(unique=True)
     
     def save(self,*args,**kwargs):
         self.slug = slugify(self.title)
@@ -32,10 +32,10 @@ class Genre(models.Model):
         return self.title
     
 class Book(models.Model):
-    title = models.CharField(max_length=100,blank=True)
-    description = models.TextField(blank=True)
-    genre = models.ForeignKey('Genre',on_delete=models.CASCADE,null=True,related_name="genres")
-    author = models.ForeignKey('Author',on_delete=models.CASCADE,null=True,related_name="authors")
+    title = models.CharField(max_length=100)
+    description = models.TextField()
+    genre = models.ForeignKey('Genre',on_delete=models.CASCADE,related_name="genres",blank=True)
+    author = models.ForeignKey('Author',on_delete=models.CASCADE,related_name="authors",blank=True)
     avg_rating = models.FloatField(default=0)
     rating_count = models.IntegerField(default=0)
     
@@ -52,3 +52,13 @@ class Review(models.Model):
     
     def __str__(self):
         return f'{self.book.title}  {self.rating}'
+    
+    
+def genre_book_decrement(sender,instance,*args,**kwargs):
+    print(instance.genre)
+    genre = Genre.objects.get(title = instance.genre)
+    genre.books_count -= 1
+    genre.save()
+    
+    
+post_delete.connect(genre_book_decrement,sender=Book)

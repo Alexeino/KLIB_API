@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from core.models import Review,Book
 from .serializers import ReviewSerializer
 from .permissions import ReviewOwnerOrReadOnly
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 
 class BookReviews(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
@@ -47,10 +47,11 @@ class BookReviews(APIView):
                 return Response(serializer.errors)
             
 class ReviewDetails(APIView):
-    permission_classes = [ReviewOwnerOrReadOnly]
+    permission_classes = [ReviewOwnerOrReadOnly,]    
     def get(self,request,pk):
         try:
             review = Review.objects.get(id=pk)
+            self.check_object_permissions(request,review)
             serializer = ReviewSerializer(review,context={'request':request})
             return Response(serializer.data)
         except Review.DoesNotExist:
@@ -61,18 +62,23 @@ class ReviewDetails(APIView):
     def put(self,request,pk):
         try:
             review = Review.objects.get(id=pk)
-            serializer = ReviewSerializer(review,data = request.data)
+            self.check_object_permissions(request,review)
+            serializer = ReviewSerializer(review,data = request.data,context={'request':request})
             if serializer.is_valid():
                 print(serializer.validated_data)
                 serializer.save(review_user = request.user,book = review.book)
                 return Response(serializer.data)
+            else:
+                return Response(serializer.errors)
         except Review.DoesNotExist:
             return Response(
                 {"Error 404":"Review Does Not Exist with this ID..."}
             )
     
     def delete(self,request,pk):
-        Review.objects.get(id=pk).delete()
+        review = Review.objects.get(id=pk)
+        self.check_object_permissions(request,review)
+        review.delete()
         return Response(
             {"SUCCESS 204":"Review Deleted Succesfully.."}
         )

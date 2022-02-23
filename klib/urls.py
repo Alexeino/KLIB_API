@@ -21,5 +21,5 @@ urlpatterns = [
     path('api/',include('core.api.urls')),
     
     # API Temp Auth
-    path('api-auth/',include('rest_framework.urls'))
+    # path('api-auth/',include('rest_framework.urls'))
 ]

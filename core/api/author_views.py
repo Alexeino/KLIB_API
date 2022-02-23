@@ -1,13 +1,16 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from core.api.permissions import IsAdminOrReadOnly
 from core.models import Author
+from rest_framework.permissions import IsAdminUser
 from .serializers import AuthorSerializer
 
 class AuthorListView(APIView):
+    permission_classes = [IsAdminOrReadOnly]
     
     def get(self,request):
         authors = Author.objects.all()
-        serializer = AuthorSerializer(authors,many=True)
+        serializer = AuthorSerializer(authors,many=True,context={'request':request})
         return Response(serializer.data)
     
     def post(self,request):
@@ -20,6 +23,7 @@ class AuthorListView(APIView):
     
     
 class AuthorDetailView(APIView):
+    permission_classes = [IsAdminOrReadOnly]
     
     def get(self,request,slug):
         try:
@@ -40,6 +44,8 @@ class AuthorDetailView(APIView):
             return Response(serializer.errors)
         
     def delete(self,request,slug):
+        permission_classes = [IsAdminUser]
+        
         Author.objects.get(slug = slug).delete()
         return Response(
             {"Deleted":"Requested Author has been removed."}

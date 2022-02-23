@@ -2,8 +2,10 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from core.models import Genre
 from .serializers import GenreSerializer
+from core.api.permissions import IsAdminOrReadOnly
 
 class GenreListView(APIView):
+    permission_classes = [IsAdminOrReadOnly]
     
     def get(self,request):
         genres = Genre.objects.all()
@@ -19,7 +21,7 @@ class GenreListView(APIView):
 
 
 class GenreDetailView(APIView):
-    
+    permission_classes = [IsAdminOrReadOnly]
     def get(self,request,slug):
         try:
             genre = Genre.objects.get(slug=slug)

@@ -3,8 +3,11 @@ from rest_framework.response import Response
 from core.models import Author
 from .serializers import AuthorSerializer, BookSerializer
 from core.models import Book,Author,Genre
+from .permissions import IsAdminOrReadOnly
 
 class BooksByAuthor(APIView):
+    permission_classes = [IsAdminOrReadOnly]
+    
     def get(self,request,slug):
         
         if Author.objects.filter(slug = slug).exists():
@@ -25,7 +28,7 @@ class BooksByAuthor(APIView):
         
         if Author.objects.filter(slug = slug).exists():
             author = Author.objects.get(slug = slug)
-            serializer = BookSerializer(data = request.data)
+            serializer = BookSerializer(data = request.data,context={'request':request})
             if serializer.is_valid():
                 serializer.save(author = author)
                 return Response(serializer.data)
@@ -37,7 +40,7 @@ class BooksByAuthor(APIView):
             })
 
 class BooksByGenre(APIView):
-    
+    permission_classes = [IsAdminOrReadOnly]
     def get(self,request,slug):
         if Genre.objects.filter(slug=slug).exists():
             
